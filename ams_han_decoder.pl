@@ -40,12 +40,13 @@ STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
 my $opts = {};
-getopts('cdhm:q', $opts);
+getopts('cdhm:p:q', $opts);
 
 if ( $opts->{'h'} or not $opts->{'m'} ) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
     -m OBIS code mapping table (required)
+    -p Program to pipe each JSON message to
     -c Compact JSON output (one meter reading per line)
     -d Show debug information
     -q Show as little information as possible
@@ -100,6 +101,17 @@ sub DEBUG {
 
 sub meter_type {
     return $opts->{'m'} // $ENV{'AMS_OBIS_MAP'};
+}
+
+sub send_json {
+    my ($str) = @_;
+    my $program = $opts->{'p'};
+    return print $str unless $program;
+    open my $pipe, '|-', $program or confess("Can't pipe to $program: $!");
+    binmode $pipe, ':raw';
+    print $pipe $str;
+    close $pipe;
+    return 1;
 }
 
 # Set serial port to 2400 baud 8E1
@@ -379,7 +391,7 @@ sub handle_hdlc_frame {
         if DEBUG;
 
     # Output frame information as JSON
-    print $json_coder->encode({
+    my $json = $json_coder->encode({
         frame => {
             hdlc_length => $length,
             hdlc_segmentation => $segmentation,
@@ -394,7 +406,9 @@ sub handle_hdlc_frame {
             @registers
         },
     });
-    print "\n" if $is_compact;
+    $json .= "\n" if $is_compact;
+
+    send_json($json);
 
     return 1;
 }
