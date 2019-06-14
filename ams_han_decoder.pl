@@ -352,7 +352,7 @@ sub handle_hdlc_frame {
                 # big-endian, first and next-to-last value is 16-bit integer, rest are 8-bit integers
                 my ($year, $month, $day, $dow, $hour, $min, $sec, $frac, $offset, $status) = unpack('s>CCC CCCC s>C', $octets);
                 # formatted as a string (almost ISO format)
-                push @register, sprintf('%u-%02u-%02u %02u:%02u:%02u,%u %+d (%b)', $year, $month, $day, $hour, $min, $sec, $frac, $offset, $status)
+                push @register, sprintf('%u-%02u-%02u %02u:%02u:%02u,%u %+d (%b)', $year, $month, $day, $hour, $min, $sec, $frac, $offset, $status);
                 # formatted as an arrayref (pay attention to the day-of-week in the middle and status at the end)
                 #push @register, [ $year, $month, $day, $dow, $hour, $min, $sec, $frac, $offset, $status ];
             }
