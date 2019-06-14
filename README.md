@@ -14,3 +14,18 @@ See main script for details on how to use it. Run with `-h` for help.
 Requires `JSON` CPAN module to work.  Install dependencies using your system
 package manager or favorite CPAN client. If you're using a Debian-based
 system, it is usually enough to `apt-get install libjson-perl`.
+
+# Installing as a systemd service shipping JSON over MQTT
+
+This is an example of using the decoder together with `mosquitto_pub` to
+ship the JSON message over MQTT to its destination.
+
+    [Unit]
+    Description=AMS HAN decoder
+
+    [Service]
+    Environment=HOME=/root
+    ExecStart=/usr/local/bin/ams-han-decoder -m AIDON_V0001 -p 'mosquitto_pub -s -t sensor/aidon' /dev/aidon
+
+    [Install]
+    WantedBy=multi-user.target
