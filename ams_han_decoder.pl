@@ -429,11 +429,18 @@ sub extend_obis {
 
 # See https://www.nek.no/info-ams-han-utviklere/ for latest version of OBIS code documentation
 sub get_obis_map {
-    my ($meter_type) = @_;
+    my ($type) = @_;
+
+    # OBIS codes common to all meters
+    my %common = (
+        "1-1:0.2.129.255" => [ "obis_version",          "OBIS list version identifier", ],
+    );
 
     # AIDON_V0001 - 10.05.2016 - Aidon HAN Interface specification 1.1 A - tested with Aidon 6525
     return {
-        "1-1:0.2.129.255" => [ "obis_version",          "OBIS list version identifier", ],
+
+        %common,
+
         "0-0:96.1.0.255"  => [ "meter_id",              "Meter ID (GIAI GS1)", ],
         "0-0:96.1.7.255"  => [ "meter_type",            "Meter type", ],
         "0-0:1.0.0.255"   => [ "meter_timestamp",       "Meter timestamp", ],
@@ -455,23 +462,32 @@ sub get_obis_map {
         "1-0:2.8.0.255"   => [ "energy_active_cum_export",   "Cumulative hourly active export energy (A-) (Q2+Q3)",   'kWh',   0.01, ],
         "1-0:3.8.0.255"   => [ "energy_reactive_cum_import", "Cumulative hourly reactive import energy (R+) (Q1+Q2)", 'kVArh', 0.01, ],
         "1-0:4.8.0.255"   => [ "energy_reactive_cum_export", "Cumulative hourly reactive export energy (R-) (Q3+Q4)", 'kVArh', 0.01, ],
-    } if $meter_type eq 'AIDON_V0001';
+
+    } if $type eq 'AIDON_V0001';
 
     # Kamstrup_V0001 - 03.05.2016 - untested (incomplete)
     return {
+
+        %common,
+
         "1-1:0.0.5.255"   => [ "meter_id",              "Meter ID (GIAI GS1)", ],
         "1-1:96.1.1.255"  => [ "meter_type",            "Meter type", ],
 
         "1-1:1.7.0.255"   => [ "power_active_import",   "Active power import (Q1+Q4)",                                'W',     1.0, ],
         "1-1:2.7.0.255"   => [ "power_active_export",   "Active power export (Q2+Q3)",                                'W',     1.0, ],
-    } if $meter_type eq 'Kamstrup_V0001';
+
+    } if $type eq 'Kamstrup_V0001';
 
     # KFM_001 - 09.11.2018 - untested (incomplete)
     return {
+
+        %common,
+
         "0-0:96.1.0.255"  => [ "meter_id",              "Meter ID (GIAI GS1)", ],
-    } if $meter_type eq 'KFM_001';
+
+    } if $type eq 'KFM_001';
     
-    confess("Unsupported meter type specified");
+    confess("Unsupported OBIS code mapping table specified: $type");
 };
 
 1;
