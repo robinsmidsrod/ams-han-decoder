@@ -68,7 +68,7 @@ EOM
 
 my $is_compact = $opts->{'c'} ? 1 : 0;
 my $is_pretty  = $opts->{'c'} ? 0 : 1;
-my $json_coder = JSON->new->canonical;
+my $json_coder = JSON->new->canonical->utf8;
 $json_coder->pretty() if $is_pretty;
 
 my $obis_map = get_obis_map( meter_type() );
