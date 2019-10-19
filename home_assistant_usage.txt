@@ -1,0 +1,22 @@
+ams_han_decoder:
+
+ams_han_decoder.pl -m AIDON_V0001 -k -c -p 'mosquitto_pub -l -t homeassistant/aidon' /dev/ttyUSB0
+
+configuration.yaml
+
+mqtt:
+  broker: 127.0.0.1
+
+sensor.yaml
+
+  -  platform: mqtt
+     state_topic: "homeassistant/aidon"
+     name: "Aidon power active import"
+     unit_of_measurement: "kW"
+     value_template: "{{ value_json['data']['power_active_import']['value'] | multiply(0.001) | round(3) }}"
+
+  -  platform: mqtt
+     state_topic: "homeassistant/aidon"
+     name: "Aidon cumulative hourly active import energy"
+     unit_of_measurement: "kWh"
+     value_template: "{{ value_json['data']['energy_active_cum_import']['value'] | multiply(1.0) | round(2) }}"
