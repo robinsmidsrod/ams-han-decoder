@@ -28,6 +28,7 @@
 
 use strict;
 use warnings;
+use feature 'state';
 
 use JSON ();
 use Encode ();
@@ -39,13 +40,14 @@ STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
 my $opts = {};
-getopts('cdhm:p:qi', $opts);
+getopts('cdhkm:p:qi', $opts);
 
 if ( $opts->{'h'} or not $opts->{'m'} ) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
     -m OBIS code mapping table (required)
     -p Program to pipe each JSON message to
+    -k Don't close program (-p) after each sent message
     -c Compact JSON output (one meter reading per line)
     -d Show debug information
     -i Ignore checksum errors
@@ -108,14 +110,31 @@ sub meter_type {
     return $opts->{'m'} // $ENV{'AMS_OBIS_MAP'};
 }
 
+sub get_pipe {
+    my $program = $opts->{'p'};
+    return unless $program;
+    state $pipe;
+    state $child_pid;
+    return $pipe, $child_pid if defined $pipe and $opts->{'k'};
+    $child_pid = open($pipe, '|-', $program) // confess("Can't pipe to $program: $!");
+    binmode $pipe, ':raw';
+    $pipe->autoflush(1);
+    return $pipe, $child_pid;
+}
+
+sub maybe_close_pipe {
+    my ($pipe, $child_pid) = @_;
+    return if $opts->{'k'};
+    close $pipe;
+    waitpid $child_pid, 0;
+}
+
 sub send_json {
     my ($str) = @_;
-    my $program = $opts->{'p'};
-    return print $str unless $program;
-    open my $pipe, '|-', $program or confess("Can't pipe to $program: $!");
-    binmode $pipe, ':raw';
+    my ($pipe, $child_pid) = get_pipe();
+    return print $str unless $pipe;
     print $pipe $str;
-    close $pipe;
+    maybe_close_pipe($pipe, $child_pid);
     return 1;
 }
 
