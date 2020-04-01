@@ -149,7 +149,6 @@ sub configure_serial_port {
         'raw',          # set device to be a data channel, not an interactive terminal
         2400,           # 2400 baud rate
         'cs8',          # 8 data bits
-        '-parodd',      # even parity
         '-cstopb',      # 1 stop bit
         '-onlcr',       # don't translate newline to carriage return-newline
         '-iexten',      # disable non-POSIX special characters
