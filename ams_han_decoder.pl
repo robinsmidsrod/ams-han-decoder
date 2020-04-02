@@ -13,6 +13,9 @@
 # Tested with Aidon 6525 power meter and a PL2303-based USB-to-MBUS adapter (FC722) from AliExpress:
 # https://www.aliexpress.com/item/USB-transfer-MBUS-module-slave-module-communication-debug-alternative-TSS721/32719562958.html
 #
+# Also tested with a Kaifa MA304H4D and packom.net M-Bus Master Hat for the Raspberry Pi:
+# https://www.packom.net/m-bus-master-hat/
+#
 # NB: As mentioned on https://www.hjemmeautomasjon.no/forums/topic/2873-lesing-av-han-the-easy-way-tm-wip/
 # the USB-to-MBUS adapter with plastic casing is tested and does cut off long messages as mentioned.
 # It is not supported. For reference, here is the link to the broken product on AliExpress:
