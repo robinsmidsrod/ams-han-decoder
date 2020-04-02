@@ -149,6 +149,7 @@ sub configure_serial_port {
         'raw',          # set device to be a data channel, not an interactive terminal
         2400,           # 2400 baud rate
         'cs8',          # 8 data bits
+        '-parodd',      # even parity
         '-cstopb',      # 1 stop bit
         '-onlcr',       # don't translate newline to carriage return-newline
         '-iexten',      # disable non-POSIX special characters
@@ -605,7 +606,7 @@ sub decode_cosem_structure {
             );
         }
         # List 2 and list 3
-        if ( $hdlc_type == 8 or $hdlc_type == 10 or $hdlc_type == 9 ) {
+        if ( $hdlc_type == 8 or $hdlc_type == 10 or $hdlc_type == 9 or $hdlc_type == 11 ) {
             @keys = (
                 encode_obis_code(1,1,0,2,129,255), # 2
                 encode_obis_code(0,0,96,1,0,255),  # 3
@@ -627,7 +628,7 @@ sub decode_cosem_structure {
             );
         }
         # List 3 (appended)
-        if ( $hdlc_type == 10 ) {
+        if ( $hdlc_type == 10 or $hdlc_type == 11 ) {
             push @keys, (
                 encode_obis_code(0,0,1,0,0,255),    # 15
 
