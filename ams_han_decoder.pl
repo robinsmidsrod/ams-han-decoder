@@ -13,6 +13,9 @@
 # Tested with Aidon 6525 power meter and a PL2303-based USB-to-MBUS adapter (FC722) from AliExpress:
 # https://www.aliexpress.com/item/USB-transfer-MBUS-module-slave-module-communication-debug-alternative-TSS721/32719562958.html
 #
+# Also tested with a Kaifa MA304H4D and packom.net M-Bus Master Hat for the Raspberry Pi:
+# https://www.packom.net/m-bus-master-hat/
+#
 # NB: As mentioned on https://www.hjemmeautomasjon.no/forums/topic/2873-lesing-av-han-the-easy-way-tm-wip/
 # the USB-to-MBUS adapter with plastic casing is tested and does cut off long messages as mentioned.
 # It is not supported. For reference, here is the link to the broken product on AliExpress:
@@ -606,7 +609,7 @@ sub decode_cosem_structure {
             );
         }
         # List 2 and list 3
-        if ( $hdlc_type == 8 or $hdlc_type == 10 or $hdlc_type == 9 ) {
+        if ( $hdlc_type == 8 or $hdlc_type == 10 or $hdlc_type == 9 or $hdlc_type == 11 ) {
             @keys = (
                 encode_obis_code(1,1,0,2,129,255), # 2
                 encode_obis_code(0,0,96,1,0,255),  # 3
@@ -628,7 +631,7 @@ sub decode_cosem_structure {
             );
         }
         # List 3 (appended)
-        if ( $hdlc_type == 10 ) {
+        if ( $hdlc_type == 10 or $hdlc_type == 11 ) {
             push @keys, (
                 encode_obis_code(0,0,1,0,0,255),    # 15
 
