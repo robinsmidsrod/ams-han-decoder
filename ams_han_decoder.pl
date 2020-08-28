@@ -609,7 +609,8 @@ sub decode_cosem_structure {
             );
         }
         # List 2 and list 3
-        if ( $hdlc_type == 8 or $hdlc_type == 10 or $hdlc_type == 9 or $hdlc_type == 11 ) {
+        # Type 11 seen on MA304H4D
+        if ( $hdlc_type == 8 or $hdlc_type == 9 or $hdlc_type == 10 or $hdlc_type == 11 ) {
             @keys = (
                 encode_obis_code(1,1,0,2,129,255), # 2
                 encode_obis_code(0,0,96,1,0,255),  # 3
@@ -631,6 +632,7 @@ sub decode_cosem_structure {
             );
         }
         # List 3 (appended)
+        # Type 11 seen on MA304H4D
         if ( $hdlc_type == 10 or $hdlc_type == 11 ) {
             push @keys, (
                 encode_obis_code(0,0,1,0,0,255),    # 15
