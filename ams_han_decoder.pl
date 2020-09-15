@@ -844,10 +844,10 @@ sub get_obis_map {
         "1-0:52.7.0.255"  => [ "phase_voltage_l2", "UL2 Phase voltage 4W meter, line voltage 3W meter",               'V',     0.1, ],
         "1-0:72.7.0.255"  => [ "phase_voltage_l3", "UL3 Phase voltage 4W meter, line voltage 3W meter",               'V',     0.1, ],
 
-        "1-0:1.8.0.255"   => [ "energy_active_cum_import",   "Cumulative hourly active import energy (A+) (Q1+Q4)",   'kWh',   0.01, ],
-        "1-0:2.8.0.255"   => [ "energy_active_cum_export",   "Cumulative hourly active export energy (A-) (Q2+Q3)",   'kWh',   0.01, ],
-        "1-0:3.8.0.255"   => [ "energy_reactive_cum_import", "Cumulative hourly reactive import energy (R+) (Q1+Q2)", 'kVArh', 0.01, ],
-        "1-0:4.8.0.255"   => [ "energy_reactive_cum_export", "Cumulative hourly reactive export energy (R-) (Q3+Q4)", 'kVArh', 0.01, ],
+        "1-0:1.8.0.255"   => [ "energy_active_cum_import",   "Cumulative hourly active import energy (A+) (Q1+Q4)",   'kWh',   0.00001, ],
+        "1-0:2.8.0.255"   => [ "energy_active_cum_export",   "Cumulative hourly active export energy (A-) (Q2+Q3)",   'kWh',   0.00001, ],
+        "1-0:3.8.0.255"   => [ "energy_reactive_cum_import", "Cumulative hourly reactive import energy (R+) (Q1+Q2)", 'kVArh', 0.00001, ],
+        "1-0:4.8.0.255"   => [ "energy_reactive_cum_export", "Cumulative hourly reactive export energy (R-) (Q3+Q4)", 'kVArh', 0.00001, ],
 
     } if $type eq 'AIDON_V0001';
 
@@ -870,10 +870,10 @@ sub get_obis_map {
         "1-1:52.7.0.255"  => [ "phase_voltage_l2", "UL2 Phase voltage 4W meter, line voltage 3W meter",               'V',     1.0, ],
         "1-1:72.7.0.255"  => [ "phase_voltage_l3", "UL3 Phase voltage 4W meter, line voltage 3W meter",               'V',     1.0, ],
 
-        "1-0:1.8.0.255"   => [ "energy_active_cum_import",   "Cumulative hourly active import energy (A+) (Q1+Q4)",   'kWh',   0.01, ],
-        "1-0:2.8.0.255"   => [ "energy_active_cum_export",   "Cumulative hourly active export energy (A-) (Q2+Q3)",   'kWh',   0.01, ],
-        "1-0:3.8.0.255"   => [ "energy_reactive_cum_import", "Cumulative hourly reactive import energy (R+) (Q1+Q2)", 'kVArh', 0.01, ],
-        "1-0:4.8.0.255"   => [ "energy_reactive_cum_export", "Cumulative hourly reactive export energy (R-) (Q3+Q4)", 'kVArh', 0.01, ],
+        "1-0:1.8.0.255"   => [ "energy_active_cum_import",   "Cumulative hourly active import energy (A+) (Q1+Q4)",   'kWh',   0.00001, ],
+        "1-0:2.8.0.255"   => [ "energy_active_cum_export",   "Cumulative hourly active export energy (A-) (Q2+Q3)",   'kWh',   0.00001, ],
+        "1-0:3.8.0.255"   => [ "energy_reactive_cum_import", "Cumulative hourly reactive import energy (R+) (Q1+Q2)", 'kVArh', 0.00001, ],
+        "1-0:4.8.0.255"   => [ "energy_reactive_cum_export", "Cumulative hourly reactive export energy (R-) (Q3+Q4)", 'kVArh', 0.00001, ],
 
     } if $type eq 'Kamstrup_V0001';
 
