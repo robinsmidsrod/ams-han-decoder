@@ -44,13 +44,15 @@ STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
 my $opts = {};
-getopts('cdhkm:p:qit:', $opts);
+getopts('cdhkm:p:qit:ax:', $opts);
 
 if ( $opts->{'h'} or not $opts->{'m'} ) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
     -m OBIS code mapping table (required)
     -t MQTT server to send messages to
+    -a Enable Home Assistant MQTT discovery
+    -x Home Assistant MQTT discovery prefix
     -p Program to pipe each JSON message to
     -k Don't close program (-p) after each sent message
     -c Compact JSON output (one meter reading per line)
@@ -69,6 +71,9 @@ are as follows: AIDON_V0001, Kamstrup_V0001, KFM_001
 
 You can also set the environment variable AMS_OBIS_MAP. If both are set, the
 command-line option takes precedence.
+
+You can also set the environment variable AMS_HA_PREFIX. If both are set,
+the command-line option takes precedence. Default value is 'homeassistant'.
 
 If the environment variable MQTT_SERVER is set, it is used to set the -t
 parameter. If bot are set, the command-line option takes precedence.
@@ -121,6 +126,10 @@ sub die_on_checksum_error {
 
 sub meter_type {
     return $opts->{'m'} // $ENV{'AMS_OBIS_MAP'};
+}
+
+sub ha_prefix {
+    return $opts->{'x'} // $ENV{'AMS_HA_PREFIX'} // 'homeassistant';
 }
 
 sub mqtt_url {
@@ -196,6 +205,11 @@ sub send_json {
             $ds->{'header'}->{'hdlc_addr_client'},
         );
         foreach my $key ( sort keys %{ $ds->{'data'} } ) {
+            configure_ha_mqtt_sensor(
+                scalar $topic,
+                scalar $key,
+                scalar $ds->{'data'}->{$key},
+            ) if $opts->{'a'};
             foreach my $k2 ( sort keys %{ $ds->{'data'}->{$key} } ) {
                 my $t = join('/', $topic, $key, $k2);
                 my $v = $ds->{'data'}->{$key}->{$k2};
@@ -207,6 +221,89 @@ sub send_json {
     if ( $fallback ) {
         print $json;
     }
+    return 1;
+}
+
+sub configure_ha_mqtt_sensor {
+    my ($device, $sensor, $ds) = @_;
+    my $node_id = $device;
+    $node_id =~ s{/}{_}g;
+    my $device_name = uc($device);
+    $device_name =~ s{/}{ }g;
+    my $object_id = join('_', $node_id, $sensor);
+    my $topic = join('/',
+        ha_prefix(),
+        'sensor',
+        $node_id,
+        $object_id,
+        'config',
+    );
+    my $state_topic = join('/', $device, $sensor, 'value');
+    my @last_reset = (
+        $sensor =~ m/_cum_/
+      ? (
+          'last_reset_topic'          => $state_topic,
+          'last_reset_value_template' => '1970-01-01T00:00:00+00'
+        )
+      : ()
+    );
+    my @device_class = (
+        $sensor =~ m/^power_/         ? ( 'device_class' => 'power' )
+      : $sensor =~ m/^phase_current_/ ? ( 'device_class' => 'current' )
+      : $sensor =~ m/^phase_voltage_/ ? ( 'device_class' => 'voltage' )
+      : $sensor =~ m/^energy_/        ? ( 'device_class' => 'energy' )
+      : ()
+    );
+    my @enabled = (
+        ( $sensor =~ m/reactive_/ or not $ds->{'unit'} )
+        ? (  'enabled_by_default' => \0 )
+        : ()
+    );
+    my $device_ids = [
+        $node_id,
+        ( $sensor eq 'meter_id' ? $ds->{'value'} : () ),
+    ];
+    my @device_model = (
+        $sensor eq 'meter_type'
+      ? ( 'model' => $ds->{'value'} )
+      : ()
+    );
+    my @device_manufacturer = (
+        $sensor eq 'obis_version'
+      ? ( 'manufacturer' => (split /_/, $ds->{'value'}, 2)[0] )
+      : ()
+    );
+    my @device_sw_version = (
+        $sensor eq 'obis_version'
+      ? ( 'sw_version' => (split /_/, $ds->{'value'}, 2)[1] )
+      : ()
+    );
+    my $config = {
+        'unique_id' => $object_id,
+        'device'    => {
+            'identifiers' => $device_ids,
+            @device_manufacturer,
+            @device_model,
+            'name'        => $device_name,
+            @device_sw_version,
+        },
+        'name' => join(' ', $device_name, $ds->{'description'} ),
+        ( $ds->{'unit'}
+          ? (
+              'unit_of_measurement' => $ds->{'unit'},
+              'state_class'         => 'measurement',
+            )
+          : ()
+        ),
+        'state_topic' => $state_topic,
+        @device_class,
+        @last_reset,
+        @enabled,
+    };
+    state $configured = {};
+    $mqtt->publish( $topic, $json_coder->encode($config) )
+        unless $configured->{$topic};
+    $configured->{$topic} = 1;
     return 1;
 }
 
