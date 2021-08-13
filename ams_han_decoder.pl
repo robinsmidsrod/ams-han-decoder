@@ -238,6 +238,8 @@ sub configure_ha_mqtt_sensor {
         $object_id,
         'config',
     );
+    state $configured = {};
+    return if $configured->{$topic};
     my $state_topic = join('/', $device, $sensor, 'value');
     my @last_reset = (
         $sensor =~ m/_cum_/
@@ -300,9 +302,7 @@ sub configure_ha_mqtt_sensor {
         @last_reset,
         @enabled,
     };
-    state $configured = {};
-    $mqtt->publish( $topic, $json_coder->encode($config) )
-        unless $configured->{$topic};
+    $mqtt->publish( $topic, $json_coder->encode($config) );
     $configured->{$topic} = 1;
     return 1;
 }
