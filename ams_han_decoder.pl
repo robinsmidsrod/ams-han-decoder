@@ -62,11 +62,12 @@ settings. 2400 8E1 is the default serial settings. Edit the script if you
 need something else. If you don't specify a file or device, standard input
 will be opened and used.
 
-An OBIS code mapping table must be specified.  The currently supported
-values are as follows: AIDON_V0001, Kamstrup_V0001, KFM_001
+An OBIS code mapping table must be specified. The currently supported values
+are as follows: AIDON_V0001, Kamstrup_V0001, KFM_001
 
-You can also set the environment variable AMS_OBIS_MAP.  If both are set,
-the command-line option takes precedence.
+You can also set the environment variable AMS_OBIS_MAP. If both are set, the
+command-line option takes precedence.
+
 EOM
     exit 1;
 }
@@ -133,11 +134,19 @@ sub maybe_close_pipe {
 }
 
 sub send_json {
-    my ($str) = @_;
-    my ($pipe, $child_pid) = get_pipe();
-    return print $str unless $pipe;
-    print $pipe $str;
-    maybe_close_pipe($pipe, $child_pid);
+    my ($ds) = @_;
+    my $json = $json_coder->encode($ds);
+    $json .= "\n" if $is_compact;
+    my $fallback = 1;
+    if ( $opts->{'p'} ) {
+        my ($pipe, $child_pid) = get_pipe();
+        print $pipe $json;
+        maybe_close_pipe($pipe, $child_pid);
+        $fallback = 0;
+    }
+    if ( $fallback ) {
+        print $json;
+    }
     return 1;
 }
 
@@ -438,7 +447,7 @@ sub decode_hdlc_frame {
         if DEBUG and $index != length($frame);
 
     # Output frame information as JSON
-    my $json = $json_coder->encode({
+    return send_json({
         'header' => {
             'hdlc_length'       => $length,
             'hdlc_segmentation' => $segmentation,
@@ -451,11 +460,6 @@ sub decode_hdlc_frame {
         'payload' => $cosem,
         'data' => decode_cosem_structure($cosem, $type),
     });
-    $json .= "\n" if $is_compact;
-
-    send_json($json);
-
-    return 1;
 }
 
 sub decode_cosem_frame {
