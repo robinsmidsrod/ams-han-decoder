@@ -38,17 +38,19 @@ use Encode ();
 use Digest::CRC ();
 use Carp qw(confess);
 use Getopt::Std;
+use URI ();
 
 STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
 my $opts = {};
-getopts('cdhkm:p:qi', $opts);
+getopts('cdhkm:p:qit:', $opts);
 
 if ( $opts->{'h'} or not $opts->{'m'} ) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
     -m OBIS code mapping table (required)
+    -t MQTT server to send messages to
     -p Program to pipe each JSON message to
     -k Don't close program (-p) after each sent message
     -c Compact JSON output (one meter reading per line)
@@ -68,6 +70,11 @@ are as follows: AIDON_V0001, Kamstrup_V0001, KFM_001
 You can also set the environment variable AMS_OBIS_MAP. If both are set, the
 command-line option takes precedence.
 
+If the environment variable MQTT_SERVER is set, it is used to set the -t
+parameter. If bot are set, the command-line option takes precedence.
+
+The path part of the MQTT server variable is used to set the MQTT topic
+prefix. Default value is '/ams'.
 EOM
     exit 1;
 }
@@ -76,7 +83,9 @@ my $is_compact = $opts->{'c'} ? 1 : 0;
 my $is_pretty  = $opts->{'c'} ? 0 : 1;
 my $json_coder = JSON->new->canonical->utf8;
 $json_coder->pretty() if $is_pretty;
-
+my $mqtt_url = mqtt_url();
+my $mqtt_topic_prefix = get_mqtt_topic_prefix( $mqtt_url );
+my $mqtt = get_mqtt( $mqtt_url );
 my $obis_map = get_obis_map( meter_type() );
 my $unit_map = get_unit_map();
 
@@ -114,6 +123,42 @@ sub meter_type {
     return $opts->{'m'} // $ENV{'AMS_OBIS_MAP'};
 }
 
+sub mqtt_url {
+    my $url = $opts->{'t'} // $ENV{'MQTT_SERVER'};
+    return unless $url;
+    return URI->new($url)->canonical;
+}
+
+sub get_mqtt_topic_prefix {
+    my ($url) = @_;
+    return unless $url;
+    my $path = $url->path || '/ams';
+    $path =~ s{^/*}{};
+    $path =~ s{/*$}{};
+    return $path;
+}
+
+sub require_module {
+    my ($class) = @_;
+    my $module_path = $class;
+    $module_path =~ s!::!/!g;
+    $module_path .= '.pm';
+    return require $module_path;
+}
+
+sub get_mqtt {
+    my ($url) = @_;
+    return unless $url;
+    my $class = $url->scheme eq 'mqtt' ? 'Net::MQTT::Simple'
+              : $url->scheme eq 'mqtts' ? 'Net::MQTT::Simple::SSL'
+              : '';
+    return unless $class;
+    require_module($class);
+    my $mqtt = $class->new( $url->host );
+    $mqtt->login( split /:/, $url->userinfo ) if $url->userinfo;
+    return $mqtt;
+}
+
 sub get_pipe {
     my $program = $opts->{'p'};
     return unless $program;
@@ -142,6 +187,21 @@ sub send_json {
         my ($pipe, $child_pid) = get_pipe();
         print $pipe $json;
         maybe_close_pipe($pipe, $child_pid);
+        $fallback = 0;
+    }
+    if ( $mqtt ) {
+        my $topic = join('/',
+            $mqtt_topic_prefix,
+            $ds->{'header'}->{'hdlc_addr_server'},
+            $ds->{'header'}->{'hdlc_addr_client'},
+        );
+        foreach my $key ( sort keys %{ $ds->{'data'} } ) {
+            foreach my $k2 ( sort keys %{ $ds->{'data'}->{$key} } ) {
+                my $t = join('/', $topic, $key, $k2);
+                my $v = $ds->{'data'}->{$key}->{$k2};
+                $mqtt->publish($t, $v);
+            }
+        }
         $fallback = 0;
     }
     if ( $fallback ) {
@@ -909,5 +969,30 @@ sub get_obis_map {
 
     confess("Unsupported OBIS code mapping table specified: $type");
 };
+
+# https://github.com/mqtt/mqtt.org/wiki/URI-Scheme
+package URI::mqtt;
+
+use strict;
+use warnings;
+
+our $VERSION = '1.00';
+
+use parent 'URI::http';
+
+sub default_port { 1883 }
+
+package URI::mqtts;
+
+use strict;
+use warnings;
+
+our $VERSION = '1.00';
+
+use parent 'URI::http';
+
+sub default_port { 8883 }
+
+sub secure { 1 }
 
 1;
