@@ -213,7 +213,7 @@ sub send_json {
             foreach my $k2 ( sort keys %{ $ds->{'data'}->{$key} } ) {
                 my $t = join('/', $topic, $key, $k2);
                 my $v = $ds->{'data'}->{$key}->{$k2};
-                $mqtt->publish($t, $v);
+                $mqtt->retain($t, $v);
             }
         }
         $fallback = 0;
@@ -302,7 +302,7 @@ sub configure_ha_mqtt_sensor {
         @last_reset,
         @enabled,
     };
-    $mqtt->publish( $topic, $json_coder->encode($config) );
+    $mqtt->retain( $topic, $json_coder->encode($config) );
     $configured->{$topic} = 1;
     return 1;
 }
