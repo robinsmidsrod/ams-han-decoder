@@ -46,10 +46,10 @@ STDERR->autoflush(1);
 my $opts = {};
 getopts('cdhkm:p:qit:ax:', $opts);
 
-if ( $opts->{'h'} or not $opts->{'m'} ) {
+if ( $opts->{'h'} or (( not $opts->{'m'} ) and not $ENV{'AMS_OBIS_MAP'} )) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
-    -m OBIS code mapping table (required)
+    -m OBIS code mapping table (required if not environment variable AMS_OBIS_MAP is set)
     -t MQTT server to send messages to
     -a Enable Home Assistant MQTT discovery
     -x Home Assistant MQTT discovery prefix
