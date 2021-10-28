@@ -163,7 +163,7 @@ sub get_mqtt {
               : '';
     return unless $class;
     require_module($class);
-    my $mqtt = $class->new( $url->host );
+    my $mqtt = $class->new( $url->host . ':' . $url->port );
     $mqtt->login( split /:/, $url->userinfo ) if $url->userinfo;
     return $mqtt;
 }
