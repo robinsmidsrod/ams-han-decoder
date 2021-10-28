@@ -15,7 +15,29 @@ Requires `JSON` CPAN module to work.  Install dependencies using your system
 package manager or favorite CPAN client. If you're using a Debian-based
 system, it is usually enough to `apt-get install libjson-perl`.
 
-# Installing as a systemd service shipping JSON over MQTT
+# Installing as a systemd service sending data to MQTT broker
+
+This is an example of using the decoder with built in MQTT client to send the data to a MQTT broker. With the -a prefix it´s enable Home Assistant MQTT discovery and the -i prefix ignores checksum errors. Change environment variables to suit your setup.
+
+    [Unit]
+    Description=AMS HAN decoder
+    After=network.target
+    
+    [Service]
+    Environment=HOME=/root
+    Environment=AMS_OBIS_MAP=XX_YY
+    Environment=MQTT_SERVER=mqtt://username:password@domain:port/topic
+    ExecStart=/bin/sh -c '/home/pi/ams-han-decoder/ams_han_decoder.pl -i -a /dev/ttyAMA0'
+    # Avoid memory leak eating all memory
+    MemoryHigh=50M
+    MemoryMax=100M
+    Restart=always
+    RestartSec=3
+    
+    [Install]
+    WantedBy=multi-user.target
+
+# Installing as a systemd service shipping JSON over MQTT with mosquitto_pub
 
 This is an example of using the decoder together with `mosquitto_pub` to
 ship the JSON messages over MQTT to its destination.
