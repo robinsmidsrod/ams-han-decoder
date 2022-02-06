@@ -241,13 +241,11 @@ sub configure_ha_mqtt_sensor {
     state $configured = {};
     return if $configured->{$topic};
     my $state_topic = join('/', $device, $sensor, 'value');
-    my @last_reset = (
-        $sensor =~ m/_cum_/
-      ? (
-          'last_reset_topic'          => $state_topic,
-          'last_reset_value_template' => '1970-01-01T00:00:00+00'
-        )
-      : ()
+    my @state_class = (
+        $sensor =~ m/_cum_/     ? ( 'state_class' => 'total_increasing' )
+      : $sensor =~ m/phase_/    ? ( 'state_class' => 'measurement' )
+      : $sensor =~ m/power_/    ? ( 'state_class' => 'measurement' )
+                : ()
     );
     my @device_class = (
         $sensor =~ m/^power_/         ? ( 'device_class' => 'power' )
@@ -292,14 +290,13 @@ sub configure_ha_mqtt_sensor {
         'name' => join(' ', $device_name, $ds->{'description'} ),
         ( $ds->{'unit'}
           ? (
-              'unit_of_measurement' => $ds->{'unit'},
-              'state_class'         => 'measurement',
+              'unit_of_measurement' => $ds->{'unit'}
             )
           : ()
         ),
         'state_topic' => $state_topic,
         @device_class,
-        @last_reset,
+        @state_class,
         @enabled,
     };
     $mqtt->retain( $topic, $json_coder->encode($config) );
