@@ -1,0 +1,136 @@
+{
+   "data" : {
+      "meter_id" : {
+         "description" : "Meter ID (GIAI GS1)",
+         "obis_code" : "0-0:96.1.0.255",
+         "value" : "7359992890941742"
+      },
+      "meter_type" : {
+         "description" : "Meter type",
+         "obis_code" : "0-0:96.1.7.255",
+         "value" : "6515"
+      },
+      "obis_version" : {
+         "description" : "OBIS list version identifier",
+         "obis_code" : "1-1:0.2.129.255",
+         "value" : "AIDON_V0001"
+      },
+      "phase_current_l1" : {
+         "description" : "IL1 Current phase L1",
+         "obis_code" : "1-0:31.7.0.255",
+         "unit" : "A",
+         "value" : 9.3
+      },
+      "phase_voltage_l1" : {
+         "description" : "UL1 Phase voltage 4W meter, line voltage 3W meter",
+         "obis_code" : "1-0:32.7.0.255",
+         "unit" : "V",
+         "value" : 250
+      },
+      "power_active_export" : {
+         "description" : "Active power export (Q2+Q3)",
+         "obis_code" : "1-0:2.7.0.255",
+         "unit" : "W",
+         "value" : 0
+      },
+      "power_active_import" : {
+         "description" : "Active power import (Q1+Q4)",
+         "obis_code" : "1-0:1.7.0.255",
+         "unit" : "W",
+         "value" : 1362
+      },
+      "power_reactive_export" : {
+         "description" : "Reactive power export (Q3+Q4)",
+         "obis_code" : "1-0:4.7.0.255",
+         "unit" : "VAr",
+         "value" : 0
+      },
+      "power_reactive_import" : {
+         "description" : "Reactive power import (Q1+Q2)",
+         "obis_code" : "1-0:3.7.0.255",
+         "unit" : "VAr",
+         "value" : 996
+      }
+   },
+   "header" : {
+      "apdu_invoke_id_and_priority" : "40000000",
+      "apdu_tag" : "0f",
+      "hdlc_addr_client" : "41",
+      "hdlc_addr_server" : "0883",
+      "hdlc_control" : "13",
+      "hdlc_fcs" : "e0c4",
+      "hdlc_frame_format" : "a0d2",
+      "hdlc_hcs" : "82d6",
+      "hdlc_length" : 210,
+      "hdlc_segmentation" : 0,
+      "hdlc_type" : 2,
+      "llc_control" : "00",
+      "llc_dst_svc_ap" : "e6",
+      "llc_src_svc_ap" : "e7"
+   },
+   "payload" : [
+      null,
+      [
+         [
+            "\u0001\u0001\u0000\u0002ÿ",
+            "AIDON_V0001"
+         ],
+         [
+            "\u0000\u0000`\u0001\u0000ÿ",
+            "7359992890941742"
+         ],
+         [
+            "\u0000\u0000`\u0001\u0007ÿ",
+            "6515"
+         ],
+         [
+            "\u0001\u0000\u0001\u0007\u0000ÿ",
+            1362,
+            [
+               0,
+               27
+            ]
+         ],
+         [
+            "\u0001\u0000\u0002\u0007\u0000ÿ",
+            0,
+            [
+               0,
+               27
+            ]
+         ],
+         [
+            "\u0001\u0000\u0003\u0007\u0000ÿ",
+            996,
+            [
+               0,
+               29
+            ]
+         ],
+         [
+            "\u0001\u0000\u0004\u0007\u0000ÿ",
+            0,
+            [
+               0,
+               29
+            ]
+         ],
+         [
+            "\u0001\u0000\u001f\u0007\u0000ÿ",
+            93,
+            [
+               -1,
+               33
+            ]
+         ],
+         [
+            "\u0001\u0000 \u0007\u0000ÿ",
+            2500,
+            [
+               -1,
+               35
+            ]
+         ]
+      ]
+   ]
+}
