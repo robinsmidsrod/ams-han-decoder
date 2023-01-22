@@ -253,7 +253,8 @@ sub configure_ha_mqtt_sensor {
         $sensor =~ m/^power_/         ? ( 'device_class' => 'power' )
       : $sensor =~ m/^phase_current_/ ? ( 'device_class' => 'current' )
       : $sensor =~ m/^phase_voltage_/ ? ( 'device_class' => 'voltage' )
-      : $sensor =~ m/^energy_/        ? ( 'device_class' => 'energy' )
+      : $sensor =~ m/^energy_active_/ ? ( 'device_class' => 'energy' )
+      : $sensor =~ m/^energy_reactive_/ ? ( 'device_class' => 'reactive_power' )
       : ()
     );
     my @enabled = (
