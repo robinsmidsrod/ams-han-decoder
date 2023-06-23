@@ -15,6 +15,13 @@ Requires `JSON` CPAN module to work.  Install dependencies using your system
 package manager or favorite CPAN client. If you're using a Debian-based
 system, it is usually enough to `apt-get install libjson-perl`.
 
+If you're using a custom Perl environment or another installation method,
+you can either use `cpanm --installdeps .` to install the dependencies where
+your environment expects them, or use `carton install` to install them in
+`local/` and use `carton exec ams_han_decoder.pl` to run the script. Or you
+can set the environment variable `PERL5LIB` to `local/lib/perl5` and run the
+binary. See [Carton](https://metacpan.org/pod/Carton) for more details.
+
 # Installing as a systemd service shipping JSON over MQTT
 
 This is an example of using the decoder together with `mosquitto_pub` to

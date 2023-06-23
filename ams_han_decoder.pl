@@ -21,13 +21,12 @@
 # It is not supported. For reference, here is the link to the broken product on AliExpress:
 # https://www.aliexpress.com/item/Freeshipping-USB-to-MBUS-slave-module-discrete-component-non-TSS721-circuit-M-BUS-bus-data-monitor/32814808312.html
 #
-# If you use this with system perl, it should be enough to install libjson-perl
-# to get it to run, or use cpanm and the provided cpanfile for installation of
-# dependencies.
-#
 # Run the script with -h for help.  If you're having problems with decoding
 # the HDLC frames from your MBUS adapter, try to use the frame_dumper.pl
 # program to get a better understanding of your stream.
+#
+# See README.md for installation details.
+#
 
 use strict;
 use warnings;
