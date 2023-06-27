@@ -11,9 +11,9 @@ See main script for details on how to use it. Run with `-h` for help.
 
 # Installing dependencies
 
-Requires `JSON` CPAN module to work.  Install dependencies using your system
+Requires `JSON` and `URI` CPAN module to work.  Install dependencies using your system
 package manager or favorite CPAN client. If you're using a Debian-based
-system, it is usually enough to `apt-get install libjson-perl`.
+system, it is usually enough to `apt-get install libjson-perl libany-uri-escape-perl`.
 
 If you're using a custom Perl environment or another installation method,
 you can either use `cpanm --installdeps .` to install the dependencies where
