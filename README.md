@@ -32,6 +32,7 @@ This is an example of using the decoder with built in MQTT client to send the da
     Environment=HOME=/root
     Environment=AMS_OBIS_MAP=XX_YY
     Environment=MQTT_SERVER=mqtt://username:password@domain:port/topic
+    Environment=MQTT_SIMPLE_ALLOW_INSECURE_LOGIN=True
     ExecStart=/bin/sh -c '/home/pi/ams-han-decoder/ams_han_decoder.pl -i -a /dev/ttyAMA0'
     # Avoid memory leak eating all memory
     MemoryHigh=50M
