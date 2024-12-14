@@ -257,12 +257,14 @@ sub configure_ha_mqtt_sensor {
       : $sensor =~ m/^power_/ ? ( 'state_class' => 'measurement' )
       : ()
     );
+    # https://www.home-assistant.io/integrations/sensor#device-class
     my @device_class = (
-        $sensor =~ m/^power_/         ? ( 'device_class' => 'power' )
-      : $sensor =~ m/^phase_current_/ ? ( 'device_class' => 'current' )
-      : $sensor =~ m/^phase_voltage_/ ? ( 'device_class' => 'voltage' )
-      : $sensor =~ m/^energy_active_/ ? ( 'device_class' => 'energy' )
-      : $sensor =~ m/^energy_reactive_/ ? ( 'device_class' => 'reactive_power' )
+        $sensor =~ m/^power_/           ? ( 'device_class' => 'power' )
+      : $sensor =~ m/^power_reactive_/  ? ( 'device_class' => 'reactive_power' )
+      : $sensor =~ m/^phase_current_/   ? ( 'device_class' => 'current' )
+      : $sensor =~ m/^phase_voltage_/   ? ( 'device_class' => 'voltage' )
+      : $sensor =~ m/^energy_active_/   ? ( 'device_class' => 'energy' )
+      #: $sensor =~ m/^energy_reactive_/ ? ( 'device_class' => 'reactive_energy' ) # Not defined in Home Assistant yet
       : ()
     );
     my @enabled = (
