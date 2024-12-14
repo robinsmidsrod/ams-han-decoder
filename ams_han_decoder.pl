@@ -76,10 +76,12 @@ You can also set the environment variable AMS_HA_PREFIX. If both are set,
 the command-line option takes precedence. Default value is 'homeassistant'.
 
 If the environment variable MQTT_SERVER is set, it is used to set the -t
-parameter. If bot are set, the command-line option takes precedence.
+parameter. If both are set, the command-line option takes precedence.
 
 The path part of the MQTT server variable is used to set the MQTT topic
 prefix. Default value is '/ams'.
+
+If MQTT or pipe (-p) output is used, no output is sent to standard output.
 EOM
     exit 1;
 }
@@ -312,6 +314,8 @@ sub configure_serial_port {
     my ($file) = @_;
     # Don't configure anything unless the file is a character device
     return 0 unless -c $file;
+    print STDERR "Configuring serial port $file...\n"
+        unless QUIET();
     system('stty',
         '-F', $file,    # device to modify
         'sane',         # reset to sane settings
