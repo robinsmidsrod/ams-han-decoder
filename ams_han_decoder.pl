@@ -45,7 +45,11 @@ STDERR->autoflush(1);
 my $opts = {};
 getopts('cdehkm:p:qit:ax:', $opts);
 
-if ( $opts->{'h'} or not $opts->{'m'} ) {
+my $required_opts_present = (
+    meter_type()
+) ? 1 : 0;
+
+if ( $opts->{'h'} or not $required_opts_present ) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
     -m OBIS code mapping table (required)
@@ -61,22 +65,25 @@ Usage: $0 [options] [<file|device>]
     -q Show as little information as possible
     -h This help
 
+These options can also be specified with environment variables:
+
+    -m AMS_OBIS_MAP
+    -t MQTT_SERVER
+    -x AMS_HA_PREFIX (default: homeassistant)
+
+Command-line options always take precedence over environment variables.
+
+An OBIS code mapping table must be specified.
+
+The currently supported values are as follows:
+    KFM_001
+    AIDON_V0001
+    Kamstrup_V0001
+
 If you specify a character device, stty will be run to configure its serial
 settings. 2400 8E1 is the default serial settings. Edit the script if you
 need something else. If you don't specify a file or device, standard input
 will be opened and used.
-
-An OBIS code mapping table must be specified. The currently supported values
-are as follows: AIDON_V0001, Kamstrup_V0001, KFM_001
-
-You can also set the environment variable AMS_OBIS_MAP. If both are set, the
-command-line option takes precedence.
-
-You can also set the environment variable AMS_HA_PREFIX. If both are set,
-the command-line option takes precedence. Default value is 'homeassistant'.
-
-If the environment variable MQTT_SERVER is set, it is used to set the -t
-parameter. If both are set, the command-line option takes precedence.
 
 The path part of the MQTT server variable is used to set the MQTT topic
 prefix. Default value is '/ams'.
