@@ -43,7 +43,7 @@ STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
 my $opts = {};
-getopts('cdhkm:p:qit:ax:', $opts);
+getopts('cdehkm:p:qit:ax:', $opts);
 
 if ( $opts->{'h'} or not $opts->{'m'} ) {
     print STDERR <<"EOM";
@@ -55,6 +55,7 @@ Usage: $0 [options] [<file|device>]
     -p Program to pipe each JSON message to
     -k Don't close program (-p) after each sent message
     -c Compact JSON output (one meter reading per line)
+    -e Exclude raw payload structure from output
     -d Show debug information
     -i Ignore checksum errors
     -q Show as little information as possible
@@ -613,7 +614,7 @@ sub decode_hdlc_frame {
                 @fields
             )
         },
-        'payload' => $cosem,
+        ( $opts->{'e'} ? () : ( 'payload' => $cosem ) ),
         'data' => decode_cosem_structure($cosem, $type),
     });
 }
