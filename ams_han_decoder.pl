@@ -259,7 +259,7 @@ sub configure_ha_mqtt_sensor {
     );
     # https://www.home-assistant.io/integrations/sensor#device-class
     my @device_class = (
-        $sensor =~ m/^power_/           ? ( 'device_class' => 'power' )
+        $sensor =~ m/^power_active_/    ? ( 'device_class' => 'power' )
       : $sensor =~ m/^power_reactive_/  ? ( 'device_class' => 'reactive_power' )
       : $sensor =~ m/^phase_current_/   ? ( 'device_class' => 'current' )
       : $sensor =~ m/^phase_voltage_/   ? ( 'device_class' => 'voltage' )
@@ -268,7 +268,7 @@ sub configure_ha_mqtt_sensor {
       : ()
     );
     my @enabled = (
-        ( $sensor =~ m/reactive_/ or not $ds->{'unit'} )
+        ( $sensor =~ m/_reactive_/ or not $ds->{'unit'} )
         ? (  'enabled_by_default' => \0 )
         : ()
     );
