@@ -11,7 +11,9 @@ See main script for details on how to use it. Run with `-h` for help.
 
 # Installing dependencies
 
-Requires `JSON` and `URI` CPAN module to work.  Install dependencies using your system package manager or favorite CPAN client. If you're using a Debian-based system, it is usually enough to `apt-get install libjson-perl libwww-perl`.
+Requires `JSON` and `URI` CPAN module to work.  Install dependencies using your system
+package manager or favorite CPAN client. If you're using a Debian-based
+system, it is usually enough to `apt-get install libjson-perl libwww-perl`.
 
 If you're using a custom Perl environment or another installation method,
 you can either use `cpanm --installdeps .` to install the dependencies where
@@ -20,9 +22,11 @@ your environment expects them, or use `carton install` to install them in
 can set the environment variable `PERL5LIB` to `local/lib/perl5` and run the
 binary. See [Carton](https://metacpan.org/pod/Carton) for more details.
 
-# Installing as a systemd service sending data to MQTT broker
+# Installing as a systemd service sending data to an MQTT broker
 
-This is an example of using the decoder with built in MQTT client to send the data to a MQTT broker. With the -a prefix it´s enable Home Assistant MQTT discovery and the -i prefix ignores checksum errors. Change environment variables to suit your setup.
+This is an example of using the decoder with built in MQTT client to send the
+data to an MQTT broker. The `-a` option enables Home Assistant's MQTT discovery.
+Change environment variables to suit your setup.
 
     [Unit]
     Description=AMS HAN decoder
@@ -30,10 +34,9 @@ This is an example of using the decoder with built in MQTT client to send the da
     
     [Service]
     Environment=HOME=/root
-    Environment=AMS_OBIS_MAP=XX_YY
-    Environment=MQTT_SERVER=mqtt://username:password@domain:port/topic
-    Environment=MQTT_SIMPLE_ALLOW_INSECURE_LOGIN=True
-    ExecStart=/bin/sh -c '/home/pi/ams-han-decoder/ams_han_decoder.pl -i -a /dev/ttyAMA0'
+    Environment=AMS_OBIS_MAP=AIDON_V0001
+    Environment=MQTT_SERVER=mqtt://myusername:mypassword@myhostname.mytld:myport/ams
+    ExecStart=/home/myuser/ams-han-decoder/ams_han_decoder.pl -a /dev/ttyAMA0
     # Avoid memory leak eating all memory
     MemoryHigh=50M
     MemoryMax=100M
