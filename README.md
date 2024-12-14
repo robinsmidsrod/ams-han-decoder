@@ -11,9 +11,9 @@ See main script for details on how to use it. Run with `-h` for help.
 
 # Installing dependencies
 
-Requires `JSON` and `URI` CPAN module to work.  Install dependencies using your system
-package manager or favorite CPAN client. If you're using a Debian-based
-system, it is usually enough to `apt-get install libjson-perl libwww-perl`.
+Requires `JSON` and `URI` CPAN modules to work. Install dependencies using
+your system package manager or favorite CPAN client. If you're using a
+Debian-based system, it is usually enough to `apt-get install libjson-perl libwww-perl`.
 
 If you're using a custom Perl environment or another installation method,
 you can either use `cpanm --installdeps .` to install the dependencies where
@@ -31,7 +31,7 @@ Change environment variables to suit your setup.
     [Unit]
     Description=AMS HAN decoder
     After=network.target
-    
+
     [Service]
     Environment=HOME=/root
     Environment=AMS_OBIS_MAP=AIDON_V0001
@@ -42,7 +42,7 @@ Change environment variables to suit your setup.
     MemoryMax=100M
     Restart=always
     RestartSec=3
-    
+
     [Install]
     WantedBy=multi-user.target
 
