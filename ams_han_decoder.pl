@@ -166,6 +166,7 @@ sub get_mqtt {
     return unless $class;
     require_module($class);
     my $mqtt = $class->new( $url->host );
+    $ENV{'MQTT_SIMPLE_ALLOW_INSECURE_LOGIN'} = 1; # allow username/password over unencrypted connections
     $mqtt->login( split /:/, $url->userinfo ) if $url->userinfo;
     return $mqtt;
 }
