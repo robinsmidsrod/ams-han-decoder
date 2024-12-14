@@ -21,13 +21,12 @@
 # It is not supported. For reference, here is the link to the broken product on AliExpress:
 # https://www.aliexpress.com/item/Freeshipping-USB-to-MBUS-slave-module-discrete-component-non-TSS721-circuit-M-BUS-bus-data-monitor/32814808312.html
 #
-# If you use this with system perl, it should be enough to install libjson-perl
-# to get it to run, or use cpanm and the provided cpanfile for installation of
-# dependencies.
-#
 # Run the script with -h for help.  If you're having problems with decoding
 # the HDLC frames from your MBUS adapter, try to use the frame_dumper.pl
 # program to get a better understanding of your stream.
+#
+# See README.md for installation details.
+#
 
 use strict;
 use warnings;
@@ -44,9 +43,13 @@ STDOUT->autoflush(1);
 STDERR->autoflush(1);
 
 my $opts = {};
-getopts('cdhkm:p:qit:ax:', $opts);
+getopts('cdehkm:p:qit:ax:', $opts);
 
-if ( $opts->{'h'} or not $opts->{'m'} ) {
+my $required_opts_present = (
+    meter_type()
+) ? 1 : 0;
+
+if ( $opts->{'h'} or not $required_opts_present ) {
     print STDERR <<"EOM";
 Usage: $0 [options] [<file|device>]
     -m OBIS code mapping table (required)
@@ -56,30 +59,36 @@ Usage: $0 [options] [<file|device>]
     -p Program to pipe each JSON message to
     -k Don't close program (-p) after each sent message
     -c Compact JSON output (one meter reading per line)
+    -e Exclude raw payload structure from output
     -d Show debug information
     -i Ignore checksum errors
     -q Show as little information as possible
     -h This help
+
+These options can also be specified with environment variables:
+
+    -m AMS_OBIS_MAP
+    -t MQTT_SERVER
+    -x AMS_HA_PREFIX (default: homeassistant)
+
+Command-line options always take precedence over environment variables.
+
+An OBIS code mapping table must be specified.
+
+The currently supported values are as follows:
+    KFM_001
+    AIDON_V0001
+    Kamstrup_V0001
 
 If you specify a character device, stty will be run to configure its serial
 settings. 2400 8E1 is the default serial settings. Edit the script if you
 need something else. If you don't specify a file or device, standard input
 will be opened and used.
 
-An OBIS code mapping table must be specified. The currently supported values
-are as follows: AIDON_V0001, Kamstrup_V0001, KFM_001
-
-You can also set the environment variable AMS_OBIS_MAP. If both are set, the
-command-line option takes precedence.
-
-You can also set the environment variable AMS_HA_PREFIX. If both are set,
-the command-line option takes precedence. Default value is 'homeassistant'.
-
-If the environment variable MQTT_SERVER is set, it is used to set the -t
-parameter. If bot are set, the command-line option takes precedence.
-
 The path part of the MQTT server variable is used to set the MQTT topic
 prefix. Default value is '/ams'.
+
+If MQTT or pipe (-p) output is used, no output is sent to standard output.
 EOM
     exit 1;
 }
@@ -163,7 +172,8 @@ sub get_mqtt {
               : '';
     return unless $class;
     require_module($class);
-    my $mqtt = $class->new( $url->host );
+    my $mqtt = $class->new( $url->host . ':' . $url->port );
+    $ENV{'MQTT_SIMPLE_ALLOW_INSECURE_LOGIN'} = 1; # allow username/password over unencrypted connections
     $mqtt->login( split /:/, $url->userinfo ) if $url->userinfo;
     return $mqtt;
 }
@@ -242,10 +252,10 @@ sub configure_ha_mqtt_sensor {
     return if $configured->{$topic};
     my $state_topic = join('/', $device, $sensor, 'value');
     my @state_class = (
-        $sensor =~ m/_cum_/     ? ( 'state_class' => 'total_increasing' )
-      : $sensor =~ m/phase_/    ? ( 'state_class' => 'measurement' )
-      : $sensor =~ m/power_/    ? ( 'state_class' => 'measurement' )
-                : ()
+        $sensor =~ m/_cum_/   ? ( 'state_class' => 'total_increasing' )
+      : $sensor =~ m/^phase_/ ? ( 'state_class' => 'measurement' )
+      : $sensor =~ m/^power_/ ? ( 'state_class' => 'measurement' )
+      : ()
     );
     my @device_class = (
         $sensor =~ m/^power_/         ? ( 'device_class' => 'power' )
@@ -289,9 +299,7 @@ sub configure_ha_mqtt_sensor {
         },
         'name' => join(' ', $device_name, $ds->{'description'} ),
         ( $ds->{'unit'}
-          ? (
-              'unit_of_measurement' => $ds->{'unit'}
-            )
+          ? ( 'unit_of_measurement' => $ds->{'unit'} )
           : ()
         ),
         'state_topic' => $state_topic,
@@ -309,6 +317,8 @@ sub configure_serial_port {
     my ($file) = @_;
     # Don't configure anything unless the file is a character device
     return 0 unless -c $file;
+    print STDERR "Configuring serial port $file...\n"
+        unless QUIET();
     system('stty',
         '-F', $file,    # device to modify
         'sane',         # reset to sane settings
@@ -611,7 +621,7 @@ sub decode_hdlc_frame {
                 @fields
             )
         },
-        'payload' => $cosem,
+        ( $opts->{'e'} ? () : ( 'payload' => $cosem ) ),
         'data' => decode_cosem_structure($cosem, $type),
     });
 }
