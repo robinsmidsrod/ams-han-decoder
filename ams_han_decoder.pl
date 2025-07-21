@@ -38,6 +38,7 @@ use Digest::CRC ();
 use Carp qw(confess);
 use Getopt::Std;
 use URI ();
+use Socket;
 
 STDOUT->autoflush(1);
 STDERR->autoflush(1);
@@ -51,7 +52,7 @@ my $required_opts_present = (
 
 if ( $opts->{'h'} or not $required_opts_present ) {
     print STDERR <<"EOM";
-Usage: $0 [options] [<file|device>]
+Usage: $0 [options] [<file|device|host:port>]
     -m OBIS code mapping table (required)
     -t MQTT server to send messages to
     -a Enable Home Assistant MQTT discovery
@@ -82,8 +83,8 @@ The currently supported values are as follows:
 
 If you specify a character device, stty will be run to configure its serial
 settings. 2400 8E1 is the default serial settings. Edit the script if you
-need something else. If you don't specify a file or device, standard input
-will be opened and used.
+need something else. If you don't specify a file, device or host:port pair,
+standard input will be opened and used.
 
 The path part of the MQTT server variable is used to set the MQTT topic
 prefix. Default value is '/ams'.
@@ -111,6 +112,22 @@ if ( defined $file and -r $file ) {
         unless QUIET();
     parse_stream($fh);
     close($fh);
+}
+elsif ( defined $file ) {
+    my ($host, $port) = split(/:/, $file);
+    die("Invalid port $port. Please specify a port between 1 and 65535\n")
+        if $port < 1 or $port > 65535;
+    my $iaddr = inet_aton($host)
+        or die("Can't resolve host: $host\n");
+    my $paddr = sockaddr_in($port, $iaddr);
+    socket(my $sock, PF_INET, SOCK_STREAM, getprotobyname("tcp"))
+        or die("Can't create socket: $!\n");
+    connect($sock, $paddr)
+        or die("Can't connect to $host:$port: $!\n");
+    print STDERR "Reading from socket $file...\n"
+        unless QUIET();
+    parse_stream($sock);
+    close($sock);
 }
 else {
     print STDERR "Reading from standard input...\n"
